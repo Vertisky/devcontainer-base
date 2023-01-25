@@ -1,5 +1,5 @@
 # generate a github action to build alpine docker image
-# and push to ghcr.io/vertisky/devcontainers
+# and push to etma/devcontainers
 name: Alpine
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Alpine
-        run: docker build -t ghcr.io/vertisky/devcontainer-base:alpine -f ./containers/alpine.Dockerfile .
+        run: docker build -t etma/devcontainer-base:alpine -f ./containers/alpine.Dockerfile .
 
   publish:
     runs-on: ubuntu-latest
@@ -105,5 +105,5 @@ jobs:
             REVISION=${{ steps.vars.outputs.commit }}
             VERSION=${{ steps.vars.outputs.version }}
           tags: |
-            ghcr.io/vertisky/devcontainers-base:${{ steps.vars.outputs.version }}
-            ghcr.io/vertisky/devcontainers-base:${{ steps.vars.outputs.alpine_version }}
+            etma/devcontainers-base:${{ steps.vars.outputs.version }}
+            etma/devcontainers-base:${{ steps.vars.outputs.alpine_version }}

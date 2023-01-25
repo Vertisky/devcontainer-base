@@ -1,1 +1,1 @@
-FROM ghcr.io/vertisky/devcontainers-base:ubuntu
+FROM etma/devcontainers-base:ubuntu

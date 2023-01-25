@@ -1,5 +1,5 @@
 # generate a github action to build debian docker image
-# and push to ghcr.io/vertisky/basedevcontainer
+# and push to etma/basedevcontainer
 name: Debian
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Debian
-        run: docker build -t ghcr.io/vertisky/devcontainer-base:debian -f ./containers/debian.Dockerfile .
+        run: docker build -t etma/devcontainer-base:debian -f ./containers/debian.Dockerfile .
 
   publish:
     runs-on: ubuntu-latest
@@ -105,5 +105,5 @@ jobs:
             REVISION=${{ steps.vars.outputs.commit }}
             VERSION=${{ steps.vars.outputs.version }}
           tags: |
-            ghcr.io/vertisky/devcontainers-base:${{ steps.vars.outputs.version }}
-            ghcr.io/vertisky/devcontainers-base:${{ steps.vars.outputs.debian_version }}
+            etma/devcontainers-base:${{ steps.vars.outputs.version }}
+            etma/devcontainers-base:${{ steps.vars.outputs.debian_version }}
