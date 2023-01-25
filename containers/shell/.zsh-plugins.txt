@@ -1,0 +1,7 @@
+git
+zsh-autosuggestions
+asdf
+vscode
+colorize
+docker
+docker-compose

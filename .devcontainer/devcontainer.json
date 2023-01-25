@@ -1,0 +1,34 @@
+{
+    "name": "devcontainers",
+    "dockerComposeFile": ["docker-compose.yml"],
+    "service": "vscode",
+    "runServices": ["vscode"],
+    "shutdownAction": "stopCompose",
+    "postCreateCommand": "~/readyEnvironment.sh",
+    "workspaceFolder": "/workspace",
+    // "overrideCommand": "",
+    "extensions": [
+        "IBM.output-colorizer",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "davidanson.vscode-markdownlint",
+        "shardulm94.trailing-spaces",
+        "alefragnani.Bookmarks",
+        "Gruntfuggly.todo-tree",
+        "mohsen1.prettify-json",
+        "quicktype.quicktype",
+        "spikespaz.vscode-smoothtype",
+        "stkb.rewrap",
+        "vscode-icons-team.vscode-icons",
+        "ms-azuretools.vscode-docker",
+        "GitHub.copilot"
+    ],
+    "settings": {
+        // General settings
+        "files.eol": "\n",
+        // Docker
+        "remote.extensionKind": {
+            "ms-azuretools.vscode-docker": "workspace"
+        }
+    }
+}
