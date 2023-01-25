@@ -1,1 +1,1 @@
-FROM etma/devcontainers-base:ubuntu
+FROM etma/devcontainer-base:ubuntu

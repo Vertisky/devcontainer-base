@@ -105,6 +105,6 @@ jobs:
             REVISION=${{ steps.vars.outputs.commit }}
             VERSION=${{ steps.vars.outputs.version }}
           tags: |
-            etma/devcontainers-base
-            etma/devcontainers-base:${{ steps.vars.outputs.version }}
-            etma/devcontainers-base:${{ steps.vars.outputs.ubuntu_version }}
+            etma/devcontainer-base
+            etma/devcontainer-base:${{ steps.vars.outputs.version }}
+            etma/devcontainer-base:${{ steps.vars.outputs.ubuntu_version }}
