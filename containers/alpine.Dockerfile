@@ -32,11 +32,11 @@ ARG KIND_VERSION
 ARG KUBE_CAPACITY_VERSION
 ARG FLUX2_VERSION
 LABEL \
-    org.opencontainers.image.title="DevContainers" \
+    org.opencontainers.image.title="Base DevContainer" \
     org.opencontainers.image.description="Base Alpine image for dev containers" \
-    org.opencontainers.image.url="https://github.com/vertisky/devcontainers" \
-    org.opencontainers.image.documentation="https://github.com/vertisky/devcontainers" \
-    org.opencontainers.image.source="https://github.com/vertisky/devcontainers" \
+    org.opencontainers.image.url="https://github.com/vertisky/devcontainers-base" \
+    org.opencontainers.image.documentation="https://github.com/vertisky/devcontainers-base" \
+    org.opencontainers.image.source="https://github.com/vertisky/devcontainers-base" \
     org.opencontainers.image.vendor="vertisky" \
     org.opencontainers.image.authors="etma@vertisky.com" \
     org.opencontainers.image.licenses="MIT" \
