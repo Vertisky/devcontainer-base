@@ -114,3 +114,4 @@ source ~/.flux.zsh
 eval "$(direnv hook zsh)"
 . "$HOME/.asdf/asdf.sh"
 PATH=$PATH:/root/.asdf/bin
+alias docker-compose="docker compose"
