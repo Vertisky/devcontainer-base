@@ -78,17 +78,17 @@ jobs:
           if [ "$TAG" != "$GITHUB_REF" ]; then
             echo ::set-output name=version::$TAG
             echo ::set-output name=alpine_version::alpine-$TAG
-            echo ::set-output name=platforms::linux/amd64
+            echo ::set-output name=platforms::linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
             echo ::set-output name=main::true
           elif [ "$BRANCH" = "main" ]; then
             echo ::set-output name=version::alpine-latest
             echo ::set-output name=alpine_version::alpine
-            echo ::set-output name=platforms::linux/amd64
+            echo ::set-output name=platforms::linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
             echo ::set-output name=main::true
           else
             echo ::set-output name=version::$BRANCH
             echo ::set-output name=alpine_version::$BRANCH-alpine
-            echo ::set-output name=platforms::linux/amd64
+            echo ::set-output name=platforms::linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
             echo ::set-output name=main::false
           fi
 
