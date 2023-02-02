@@ -6,15 +6,9 @@ colorize
 docker
 docker-compose
 direnv
-kube-ps1
-kubectl
-kubectx
-minikube
 colored-man-pages
 doctl
-fluxcd
 gcloud
 git
 git-auto-fetch
-helm
 history
