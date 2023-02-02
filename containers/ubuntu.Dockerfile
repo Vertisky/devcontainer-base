@@ -57,7 +57,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     locales \
     make \
     less \
-    direnv
+    direnv \
+    unzip
 
 # Install zsh and setup powerlevel10k theme
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y zsh

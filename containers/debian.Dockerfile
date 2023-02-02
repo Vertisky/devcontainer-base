@@ -58,7 +58,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     locales \
     make \
     less \
-    direnv
+    direnv \
+    unzip
 
 # Install zsh and setup powerlevel10k theme
 RUN apt-get install --no-install-recommends -y zsh
