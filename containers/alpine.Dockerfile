@@ -60,15 +60,6 @@ RUN apk add -q --update --progress --no-cache \
     less \
     direnv
 
-# set PLATFORM to uname -m output
-ARG PLATFORM
-RUN if [ -z "$PLATFORM" ]; then PLATFORM=$(uname -m); fi && \
-    if [ "$PLATFORM" = "x86_64" ]; then PLATFORM="amd64"; fi && \
-    if [ "$PLATFORM" = "aarch64" ]; then PLATFORM="arm64"; fi && \
-    if [ "$PLATFORM" = "armv7l" ]; then PLATFORM="arm"; fi && \
-    if [ "$PLATFORM" = "armv6l" ]; then PLATFORM="arm"; fi && \
-    echo "PLATFORM=$PLATFORM"
-
 # Install zsh and setup powerlevel10k theme
 RUN apk add -q --update --progress --no-cache zsh zsh-vcs
 RUN git clone --single-branch --depth 1 https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
@@ -129,13 +120,26 @@ RUN /root/.asdf/bin/asdf plugin add flux2 && /root/.asdf/bin/asdf install flux2 
 # install kubectl-oidc-login, download it from github release
 # if PLATFORM is linux/amd64, download from https://github.com/int128/kubelogin/releases/download/<OIDC_LOGIN_VERSION>/kubelogin_linux_amd64.zip
 # if PLATFORM is linux/arm64, download from https://github.com/int128/kubelogin/releases/download/<OIDC_LOGIN_VERSION>/kubelogin_linux_arm64.zip
-RUN if [ "${PLATFORM}" = "linux/amd64" ]; then \
-        curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_amd64.zip \
-    elif [ "${PLATFORM}" = "linux/arm64" ]; then \
-        curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_arm64.zip \
-    fi && \
+RUN if [ -z "$PLATFORM" ]; then PLATFORM=$(uname -m); fi && \
+    if [ "$PLATFORM" = "x86_64" ]; then PLATFORM="amd64"; fi && \
+    if [ "$PLATFORM" = "aarch64" ]; then PLATFORM="arm64"; fi && \
+    if [ "$PLATFORM" = "armv7l" ]; then PLATFORM="arm"; fi && \
+    if [ "$PLATFORM" = "armv6l" ]; then PLATFORM="arm"; fi && \
+    echo "PLATFORM=$PLATFORM" && case ${PLATFORM} in \
+        amd64) \
+            curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_amd64.zip \
+            ;; \
+        arm64) \
+            curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_arm64.zip \
+            ;; \
+        *) \
+            echo "Unsupported platform: ${PLATFORM}" \
+            exit 1 \
+            ;; \
+    esac && \
     unzip /tmp/kubelogin.zip && \
-    mv kubelogin /root/.asdf/shims/kubectl-oidc_login
+    mv kubelogin /usr/local/bin/kubectl-oidc_login && \
+    chmod +x /usr/local/bin/kubectl-oidc_login
 
 
 # cleanup
