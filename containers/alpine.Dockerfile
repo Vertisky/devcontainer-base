@@ -1,3 +1,4 @@
+ARG PLATFORM
 ARG ALPINE_VERSION=3.16
 ARG DOCKER_VERSION=20.10.22
 ARG ASDF_VERSION=v0.11.0
@@ -11,11 +12,13 @@ ARG K9S_VERSION=0.26.7
 ARG KIND_VERSION=0.17.0
 ARG KUBE_CAPACITY_VERSION=v0.7.1
 ARG FLUX2_VERSION=0.38.2
+ARG OIDC_LOGIN_VERSION=v1.26.0
 
 
 FROM docker:${DOCKER_VERSION} AS docker
 
 FROM alpine:${ALPINE_VERSION}
+ARG PLATFORM
 ARG VERSION
 ARG COMMIT
 ARG BUILD_DATE
@@ -31,6 +34,7 @@ ARG K9S_VERSION
 ARG KIND_VERSION
 ARG KUBE_CAPACITY_VERSION
 ARG FLUX2_VERSION
+ARG OIDC_LOGIN_VERSION
 LABEL \
     org.opencontainers.image.title="Base DevContainer" \
     org.opencontainers.image.description="Base Alpine image for dev containers" \
@@ -55,6 +59,15 @@ RUN apk add -q --update --progress --no-cache \
     make \
     less \
     direnv
+
+# set PLATFORM to uname -m output
+ARG PLATFORM
+RUN if [ -z "$PLATFORM" ]; then PLATFORM=$(uname -m); fi && \
+    if [ "$PLATFORM" = "x86_64" ]; then PLATFORM="amd64"; fi && \
+    if [ "$PLATFORM" = "aarch64" ]; then PLATFORM="arm64"; fi && \
+    if [ "$PLATFORM" = "armv7l" ]; then PLATFORM="arm"; fi && \
+    if [ "$PLATFORM" = "armv6l" ]; then PLATFORM="arm"; fi && \
+    echo "PLATFORM=$PLATFORM"
 
 # Install zsh and setup powerlevel10k theme
 RUN apk add -q --update --progress --no-cache zsh zsh-vcs
@@ -112,3 +125,18 @@ RUN /root/.asdf/bin/asdf plugin add k9s && /root/.asdf/bin/asdf install k9s ${K9
 RUN /root/.asdf/bin/asdf plugin add kind && /root/.asdf/bin/asdf install kind ${KIND_VERSION} && /root/.asdf/bin/asdf global kind ${KIND_VERSION}
 RUN /root/.asdf/bin/asdf plugin add kube-capacity && /root/.asdf/bin/asdf install kube-capacity ${KUBE_CAPACITY_VERSION} && /root/.asdf/bin/asdf global kube-capacity ${KUBE_CAPACITY_VERSION}
 RUN /root/.asdf/bin/asdf plugin add flux2 && /root/.asdf/bin/asdf install flux2 ${FLUX2_VERSION} && /root/.asdf/bin/asdf global flux2 ${FLUX2_VERSION}
+
+# install kubectl-oidc-login, download it from github release
+# if PLATFORM is linux/amd64, download from https://github.com/int128/kubelogin/releases/download/<OIDC_LOGIN_VERSION>/kubelogin_linux_amd64.zip
+# if PLATFORM is linux/arm64, download from https://github.com/int128/kubelogin/releases/download/<OIDC_LOGIN_VERSION>/kubelogin_linux_arm64.zip
+RUN if [ "${PLATFORM}" = "linux/amd64" ]; then \
+        curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_amd64.zip \
+    elif [ "${PLATFORM}" = "linux/arm64" ]; then \
+        curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_arm64.zip \
+    fi && \
+    unzip /tmp/kubelogin.zip && \
+    mv kubelogin /root/.asdf/shims/kubectl-oidc_login
+
+
+# cleanup
+RUN rm -r /tmp/*
