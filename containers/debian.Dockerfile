@@ -1,23 +1,7 @@
 ARG DEBIAN_VERSION=bullseye-slim
 ARG DOCKER_VERSION=20.10.23
 ARG ASDF_VERSION=v0.11.1
-ARG DOCKER_COMPOSE_VERSION=v2.15.0
-ARG KUBECTL_VERSION=1.26.0
-ARG HELM_VERSION=3.11.0
-ARG KUBECTX_VERSION=0.9.4
-ARG MINIKUBE_VERSION=1.29.0
-ARG KUSTOMIZE_VERSION=4.5.7
-ARG K9S_VERSION=0.27.2
-ARG KIND_VERSION=0.17.0
-ARG KUBE_CAPACITY_VERSION=v0.7.3
-ARG FLUX2_VERSION=0.38.3
-ARG OIDC_LOGIN_VERSION=v1.26.0
 ARG DIRENV_VERSION=2.32.2
-ARG KUBESPY_VERSION=0.6.1
-ARG KUBECONFORM_VERSION=0.5.0
-ARG POPEYE_VERSION=v0.10.1
-ARG KUBE_SCORE_VERSION=1.16.1
-ARG KUBE_LINTER_VERSION=0.6.0
 
 FROM docker:${DOCKER_VERSION} AS docker
 
@@ -27,23 +11,7 @@ ARG COMMIT
 ARG BUILD_DATE
 ARG ASDF_VERSION
 ARG SHELL
-ARG DOCKER_COMPOSE_VERSION
-ARG KUBECTL_VERSION
-ARG HELM_VERSION
-ARG KUBECTX_VERSION
-ARG MINIKUBE_VERSION
-ARG KUSTOMIZE_VERSION
-ARG K9S_VERSION
-ARG KIND_VERSION
-ARG KUBE_CAPACITY_VERSION
-ARG FLUX2_VERSION
-ARG OIDC_LOGIN_VERSION
 ARG DIRENV_VERSION
-ARG KUBESPY_VERSION
-ARG KUBECONFORM_VERSION
-ARG POPEYE_VERSION
-ARG KUBE_SCORE_VERSION
-ARG KUBE_LINTER_VERSION
 LABEL \
     org.opencontainers.image.title="Base DevContainer" \
     org.opencontainers.image.description="Base Debian image for dev containers" \
@@ -125,47 +93,7 @@ RUN mkdir -p /root/.config/direnv && echo "[whitelist]" >> /root/.config/direnv/
 
 # Install asdf base plugins
 RUN touch /root/.tool-versions
-# RUN /root/.asdf/bin/asdf plugin add docker-compose-v1 && /root/.asdf/bin/asdf install docker-compose-v1 ${DOCKER_COMPOSE_VERSION} && /root/.asdf/bin/asdf global docker-compose-v1 ${DOCKER_COMPOSE_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kubectl && /root/.asdf/bin/asdf install kubectl ${KUBECTL_VERSION} && /root/.asdf/bin/asdf global kubectl ${KUBECTL_VERSION}
-RUN /root/.asdf/bin/asdf plugin add helm && /root/.asdf/bin/asdf install helm ${HELM_VERSION} && /root/.asdf/bin/asdf global helm ${HELM_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kubectx && /root/.asdf/bin/asdf install kubectx ${KUBECTX_VERSION} && /root/.asdf/bin/asdf global kubectx ${KUBECTX_VERSION}
-RUN /root/.asdf/bin/asdf plugin add minikube && /root/.asdf/bin/asdf install minikube ${MINIKUBE_VERSION} && /root/.asdf/bin/asdf global minikube ${MINIKUBE_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kustomize && /root/.asdf/bin/asdf install kustomize ${KUSTOMIZE_VERSION} && /root/.asdf/bin/asdf global kustomize ${KUSTOMIZE_VERSION}
-RUN /root/.asdf/bin/asdf plugin add k9s && /root/.asdf/bin/asdf install k9s ${K9S_VERSION} && /root/.asdf/bin/asdf global k9s ${K9S_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kind && /root/.asdf/bin/asdf install kind ${KIND_VERSION} && /root/.asdf/bin/asdf global kind ${KIND_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kube-capacity && /root/.asdf/bin/asdf install kube-capacity ${KUBE_CAPACITY_VERSION} && /root/.asdf/bin/asdf global kube-capacity ${KUBE_CAPACITY_VERSION}
-RUN /root/.asdf/bin/asdf plugin add flux2 && /root/.asdf/bin/asdf install flux2 ${FLUX2_VERSION} && /root/.asdf/bin/asdf global flux2 ${FLUX2_VERSION}
 RUN /root/.asdf/bin/asdf plugin add direnv && /root/.asdf/bin/asdf install direnv ${DIRENV_VERSION} && /root/.asdf/bin/asdf global direnv ${DIRENV_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kubespy && /root/.asdf/bin/asdf install kubespy ${KUBESPY_VERSION} && /root/.asdf/bin/asdf global kubespy ${KUBESPY_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kubeconform && /root/.asdf/bin/asdf install kubeconform ${KUBECONFORM_VERSION} && /root/.asdf/bin/asdf global kubeconform ${KUBECONFORM_VERSION}
-RUN /root/.asdf/bin/asdf plugin add popeye && /root/.asdf/bin/asdf install popeye ${POPEYE_VERSION} && /root/.asdf/bin/asdf global popeye ${POPEYE_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kube-score && /root/.asdf/bin/asdf install kube-score ${KUBE_SCORE_VERSION} && /root/.asdf/bin/asdf global kube-score ${KUBE_SCORE_VERSION}
-RUN /root/.asdf/bin/asdf plugin add kube-linter && /root/.asdf/bin/asdf install kube-linter ${KUBE_LINTER_VERSION} && /root/.asdf/bin/asdf global kube-linter ${KUBE_LINTER_VERSION}
-
-# install kubectl-oidc-login, download it from github release
-# if PLATFORM is linux/amd64, download from https://github.com/int128/kubelogin/releases/download/<OIDC_LOGIN_VERSION>/kubelogin_linux_amd64.zip
-# if PLATFORM is linux/arm64, download from https://github.com/int128/kubelogin/releases/download/<OIDC_LOGIN_VERSION>/kubelogin_linux_arm64.zip
-RUN if [ -z "$PLATFORM" ]; then PLATFORM=$(uname -m); fi && \
-    if [ "$PLATFORM" = "x86_64" ]; then PLATFORM="amd64"; fi && \
-    if [ "$PLATFORM" = "aarch64" ]; then PLATFORM="arm64"; fi && \
-    if [ "$PLATFORM" = "armv7l" ]; then PLATFORM="arm"; fi && \
-    if [ "$PLATFORM" = "armv6l" ]; then PLATFORM="arm"; fi && \
-    echo "PLATFORM=$PLATFORM" && case ${PLATFORM} in \
-        amd64) \
-            curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_amd64.zip \
-            ;; \
-        arm64) \
-            curl -L -o /tmp/kubelogin.zip https://github.com/int128/kubelogin/releases/download/${OIDC_LOGIN_VERSION}/kubelogin_linux_arm64.zip \
-            ;; \
-        *) \
-            echo "Unsupported platform: ${PLATFORM}" \
-            exit 1 \
-            ;; \
-    esac && \
-    unzip /tmp/kubelogin.zip && \
-    mv kubelogin /usr/local/bin/kubectl-oidc_login && \
-    chmod +x /usr/local/bin/kubectl-oidc_login
-
 
 # cleanup
-RUN apt-get clean && rm -r /var/lib/apt/lists/* && rm -r /var/cache/* && rm -r /tmp/*
+RUN apt-get clean && rm -r /var/lib/apt/lists/* && rm -r /var/cache/*
