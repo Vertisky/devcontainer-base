@@ -1,9 +1,24 @@
-ARG UBUNTU_VERSION=22.04
-ARG DOCKER_VERSION=20.10.23
-ARG ASDF_VERSION=v0.11.1
-ARG DIRENV_VERSION=2.32.2
+ARG UBUNTU_VERSION=24.04
+ARG DOCKER_VERSION=28.0.0
+ARG ASDF_VERSION=v0.16.0
+ARG DIRENV_VERSION=2.35.0
 
 FROM docker:${DOCKER_VERSION} AS docker
+
+FROM golang:latest AS asdf
+ARG ASDF_VERSION
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git curl unzip build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install ASDF
+RUN git clone https://github.com/asdf-vm/asdf.git /workspace/.asdf --branch ${ASDF_VERSION}
+
+# Build ASDF
+WORKDIR /workspace/.asdf
+RUN make
 
 FROM ubuntu:${UBUNTU_VERSION}
 ARG VERSION
@@ -83,18 +98,17 @@ RUN git config --global advice.detachedHead false
 COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
 
 # Install docker buildx
-COPY --from=docker /usr/libexec/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx
+# COPY --from=docker /usr/libexec/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
 # Install asdf
-RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch $ASDF_VERSION
+COPY --from=asdf /workspace/.asdf/asdf /usr/bin/asdf
 
 # auto whitelist /workspace in direnv config
 RUN mkdir -p /root/.config/direnv && echo "[whitelist]" >> /root/.config/direnv/direnv.toml \
     && echo "prefix = [ \"/workspace\" ]" >> /root/.config/direnv/direnv.toml
 
 # Install asdf base plugins
-RUN touch /root/.tool-versions
-RUN /root/.asdf/bin/asdf plugin add direnv && /root/.asdf/bin/asdf install direnv ${DIRENV_VERSION} && /root/.asdf/bin/asdf global direnv ${DIRENV_VERSION}
+RUN asdf plugin add direnv && asdf install direnv ${DIRENV_VERSION} && asdf global direnv ${DIRENV_VERSION}
 
 # cleanup
 RUN apt-get clean && rm -r /var/lib/apt/lists/* && rm -r /var/cache/*
