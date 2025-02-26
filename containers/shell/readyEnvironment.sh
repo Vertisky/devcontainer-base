@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # copy files from /mnt to /root to avoid messing with the host
 cp -R /mnt/.docker /mnt/.ssh /mnt/.gitconfig /mnt/.zsh_history /root
