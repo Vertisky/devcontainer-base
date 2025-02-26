@@ -78,6 +78,7 @@ COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
 
 # Install docker buildx
 # COPY --from=docker /usr/libexec/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx
+COPY --from=docker/buildx-bin /buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
 
 # Install asdf
