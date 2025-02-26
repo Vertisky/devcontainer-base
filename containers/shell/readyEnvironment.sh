@@ -7,8 +7,8 @@ cp -R /mnt/.docker /mnt/.ssh /mnt/.gitconfig /mnt/.zsh_history /root
 git config --global --add safe.directory /workspace
 
 # execute any files named setup*.sh in /root
-setopt no_nomatch
+# setopt no_nomatch
 for f in /root/setup*.sh; do
     [ -f "$f" ] && . "$f"
 done
-setopt nomatch
+# setopt nomatch

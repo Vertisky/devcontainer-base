@@ -1,7 +1,13 @@
-ARG DEBIAN_VERSION=bullseye-slim
-ARG DOCKER_VERSION=20.10.23
-ARG ASDF_VERSION=v0.11.1
-ARG DIRENV_VERSION=2.32.2
+ARG DEBIAN_VERSION=bookworm-slim
+ARG DOCKER_VERSION=28.0.0
+ARG ASDF_VERSION=v0.16.4
+ARG DIRENV_VERSION=2.35.0
+
+
+FROM golang:1.24.0 AS asdf
+ARG ASDF_VERSION
+
+RUN go install github.com/asdf-vm/asdf/cmd/asdf@${ASDF_VERSION} 
 
 FROM docker:${DOCKER_VERSION} AS docker
 
@@ -39,7 +45,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     direnv \
     unzip \
     jq \
-    wget
+    wget \
+    vim \
+    build-essential
 
 # install yq
 RUN if [ -z "$PLATFORM" ]; then PLATFORM=$(uname -m); fi && \
@@ -50,20 +58,10 @@ RUN if [ -z "$PLATFORM" ]; then PLATFORM=$(uname -m); fi && \
     curl -sL -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${PLATFORM} && \
     chmod +x /usr/local/bin/yq
 
-# Install zsh and setup powerlevel10k theme
-RUN apt-get install --no-install-recommends -y zsh
-RUN git clone --single-branch --depth 1 https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
-RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-RUN git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-RUN usermod -s /bin/zsh root
-
-ENTRYPOINT [ "/bin/zsh" ]
+ENTRYPOINT [ "/bin/bash" ]
 
 COPY ./containers/shell/* /root/
 RUN chmod +x /root/*.sh
-
-# Install vim
-RUN apt-get install --no-install-recommends -y vim
 
 # Set vim as default editor
 ENV EDITOR=vim \
@@ -82,18 +80,21 @@ RUN git config --global advice.detachedHead false
 COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
 
 # Install docker buildx
-COPY --from=docker /usr/libexec/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx
+# COPY --from=docker /usr/libexec/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
 # Install asdf
-RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch $ASDF_VERSION
+COPY --from=asdf /go/bin/asdf /usr/bin/asdf
+# add export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH" to .bash_profile
+RUN echo "export PATH=\"\${ASDF_DATA_DIR:-\$HOME/.asdf}/shims:\$PATH\"" >> /root/.bashrc
+# add bash completions . <(asdf completion bash)
+RUN echo ". <(asdf completion bash)" >> /root/.bashrc
 
 # auto whitelist /workspace in direnv config
 RUN mkdir -p /root/.config/direnv && echo "[whitelist]" >> /root/.config/direnv/direnv.toml \
     && echo "prefix = [ \"/workspace\" ]" >> /root/.config/direnv/direnv.toml
 
 # Install asdf base plugins
-RUN touch /root/.tool-versions
-RUN /root/.asdf/bin/asdf plugin add direnv && /root/.asdf/bin/asdf install direnv ${DIRENV_VERSION} && /root/.asdf/bin/asdf global direnv ${DIRENV_VERSION}
+RUN asdf plugin add direnv && asdf install direnv ${DIRENV_VERSION} && asdf set -u direnv ${DIRENV_VERSION} && asdf direnv setup --shell bash --version ${DIRENV_VERSION} && asdf reshim direnv
 
 # cleanup
 RUN apt-get clean && rm -r /var/lib/apt/lists/* && rm -r /var/cache/*
