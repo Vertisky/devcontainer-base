@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # copy files from /mnt to /root to avoid messing with the host
-cp -R /mnt/.docker /mnt/.ssh /mnt/.gitconfig /mnt/.zsh_history /root
+cp -R /mnt/.docker /mnt/.ssh /mnt/.gitconfig /mnt/.bash_history /root
 
 # add /workspace to safe github repos
 git config --global --add safe.directory /workspace
